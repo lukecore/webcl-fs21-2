@@ -116,24 +116,37 @@ const TodoItemsView = (todoController, rootElement) => {
 };
 
 const TodoDetailView = (todoController, rootElement) => {
+    const infoLabel = document.createTextNode('No todo selected');
+
+
+
 	
     const render = selectedTodo => {
-		// TODO: remove info label or fields on todo select
-		
-		// show details only if todo is selected
+
+        // show details only if todo is selected
 		if (selectedTodo) {
-			function createElements() {
-				const template = document.createElement('DIV'); // only for parsing
-				template.innerHTML = `
-					<b>Titel</b>
+		    if(infoLabel.parentNode != null && infoLabel.parentNode.contains(infoLabel)) {
+                infoLabel.parentNode.removeChild(infoLabel)
+            }
+            const template = document.createElement('DIV'); // only for parsing
+
+            function createElements() {
+                template.innerHTML = `
+					<div id="toDoDetail"><b>Titel</b></div>
 					<input type="text" size="42">
 					<b>Done</b>
 					<input type="checkbox">            
 				`;
-				return template.children;
-			}
+                return template.children;
+            }
+
 			const [labelTitle, inputElement, labelDone, checkboxElement] = createElements();
 
+            if(rootElement.querySelector("#toDoDetail")){
+                while(rootElement.firstChild){
+                    rootElement.removeChild(rootElement.firstChild)
+                }
+            }
 			checkboxElement.onclick = _ => selectedTodo.setDone(checkboxElement.checked);
 			inputElement.oninput = _ => selectedTodo.setText(inputElement.value);
 			selectedTodo.onTextChanged(() => inputElement.value = selectedTodo.getText());
@@ -150,7 +163,6 @@ const TodoDetailView = (todoController, rootElement) => {
 			rootElement.appendChild(checkboxElement);
 		} else {
 			// no todo selected
-			const infoLabel = document.createTextNode('No todo selected');
 			rootElement.appendChild(infoLabel);
 		}
     };
