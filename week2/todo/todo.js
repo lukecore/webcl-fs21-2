@@ -34,7 +34,7 @@ const TodoController = () => {
         todoModel.add(newTodo);
         return newTodo;
     };
-	
+
     const selectTodo = todo => selectedTodo.setValue(todo);
 
     const addFortuneTodo = () => {
@@ -85,6 +85,7 @@ const TodoItemsView = (todoController, rootElement) => {
             `;
             return template.children;
         }
+
         const [deleteButton, textLabel, todoDone, showButton] = createElements();
 
         showButton.onclick = _ => todoController.selectTodo(todo);
@@ -118,15 +119,17 @@ const TodoItemsView = (todoController, rootElement) => {
 const TodoDetailView = (todoController, rootElement) => {
     const infoLabel = document.createTextNode('No todo selected');
 
-
-
-	
     const render = selectedTodo => {
 
         // show details only if todo is selected
 		if (selectedTodo) {
 		    if(infoLabel.parentNode != null && infoLabel.parentNode.contains(infoLabel)) {
                 infoLabel.parentNode.removeChild(infoLabel)
+            }
+            if (rootElement.querySelector("#toDoDetail")) {
+                while (rootElement.firstChild) {
+                    rootElement.removeChild(rootElement.firstChild)
+                }
             }
             const template = document.createElement('DIV'); // only for parsing
 
@@ -135,21 +138,18 @@ const TodoDetailView = (todoController, rootElement) => {
 					<div id="toDoDetail"><b>Titel</b></div>
 					<input type="text" size="42">
 					<b>Done</b>
-					<input type="checkbox">            
+					<input id="detailsCheckbox" type="checkbox">            
 				`;
                 return template.children;
             }
 
 			const [labelTitle, inputElement, labelDone, checkboxElement] = createElements();
 
-            if(rootElement.querySelector("#toDoDetail")){
-                while(rootElement.firstChild){
-                    rootElement.removeChild(rootElement.firstChild)
-                }
-            }
-			checkboxElement.onclick = _ => selectedTodo.setDone(checkboxElement.checked);
-			inputElement.oninput = _ => selectedTodo.setText(inputElement.value);
-			selectedTodo.onTextChanged(() => inputElement.value = selectedTodo.getText());
+
+
+            checkboxElement.onclick = _ => selectedTodo.setDone(checkboxElement.checked);
+            inputElement.oninput = _ => selectedTodo.setText(inputElement.value);
+            selectedTodo.onTextChanged(() => inputElement.value = selectedTodo.getText());
 
 			selectedTodo.onTextValidChanged(
 				valid => valid
@@ -157,14 +157,17 @@ const TodoDetailView = (todoController, rootElement) => {
 				  : inputElement.classList.add("invalid")
 			);
 
-			rootElement.appendChild(labelTitle);
-			rootElement.appendChild(inputElement);
-			rootElement.appendChild(labelDone);
-			rootElement.appendChild(checkboxElement);
-		} else {
-			// no todo selected
-			rootElement.appendChild(infoLabel);
-		}
+            rootElement.appendChild(labelTitle);
+            rootElement.appendChild(inputElement);
+            rootElement.appendChild(labelDone);
+            rootElement.appendChild(checkboxElement);
+
+            document.getElementById("detailsCheckbox").checked = selectedTodo.getDone();
+            inputElement.innerHTML = selectedTodo.getText();
+        } else {
+            // no todo selected
+            rootElement.appendChild(infoLabel);
+        }
     };
 
     // binding
