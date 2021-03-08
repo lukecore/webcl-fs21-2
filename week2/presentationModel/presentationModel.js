@@ -9,8 +9,6 @@ const Attribute = value => {
     const valueObs = Observable(value);
     const validObs = Observable(true);
 
-    // todo: add required functions here
-
     let converter = id;
     const setConverter = newConverter => {
         converter = new newConverter;
