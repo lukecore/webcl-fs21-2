@@ -8,11 +8,10 @@ export { TodoController, TodoItemsView, TodoTotalView, TodoOpenView, TodoDetailV
 const TodoController = () => {
 
     const Todo = () => {                               // facade
-        const textAttr = Attribute("text");
+        const textAttr = Attribute("Master-Detail-View");
         const doneAttr = Attribute(false);
 
         textAttr.setConverter( input => input.toUpperCase() );
-        textAttr.setValidator( input => input.length >= 3   );
 
         return {
             getDone:            doneAttr.valueObs.getValue,
@@ -122,8 +121,10 @@ const TodoDetailView = (todoController, rootElement) => {
     const render = selectedTodo => {
 
         // show details only if todo is selected
-		if (selectedTodo) {
-		    if(infoLabel.parentNode != null && infoLabel.parentNode.contains(infoLabel)) {
+        if (selectedTodo) {
+			
+            // remove unused elements before rendering
+            if(infoLabel.parentNode != null && infoLabel.parentNode.contains(infoLabel)) {
                 infoLabel.parentNode.removeChild(infoLabel)
             }
             if (rootElement.querySelector("#toDoDetail")) {
@@ -131,39 +132,39 @@ const TodoDetailView = (todoController, rootElement) => {
                     rootElement.removeChild(rootElement.firstChild)
                 }
             }
+			
             const template = document.createElement('DIV'); // only for parsing
-
             function createElements() {
                 template.innerHTML = `
-					<div id="toDoDetail"><b>Titel</b></div>
-					<input type="text" size="42">
-					<b>Done</b>
-					<input id="detailsCheckbox" type="checkbox">            
-				`;
+                    <div id="toDoDetail"><b>Titel</b></div>
+                    <input type="text" size="42">
+                    <b>Done</b>
+                    <input id="detailsCheckbox" type="checkbox">            
+                `;
                 return template.children;
             }
 
-			const [labelTitle, inputElement, labelDone, checkboxElement] = createElements();
-
-
+            const [labelTitle, inputElement, labelDone, checkboxElement] = createElements();
 
             checkboxElement.onclick = _ => selectedTodo.setDone(checkboxElement.checked);
+
+            inputElement.oninput = _ => selectedTodo.setText(inputElement.value);
             selectedTodo.onTextChanged(() => inputElement.value = selectedTodo.getText());
+			
+            selectedTodo.onTextValidChanged(
+                valid => valid
+                    ? inputElement.classList.remove("invalid")
+                    : inputElement.classList.add("invalid")
+            );
 
-			selectedTodo.onTextValidChanged(
-				valid => valid
-				  ? inputElement.classList.remove("invalid")
-				  : inputElement.classList.add("invalid")
-			);
-
-
-            inputElement.innerHTML = selectedTodo.getText();
+            // set initial values
+            checkboxElement.checked = selectedTodo.getDone();
+            inputElement.value = selectedTodo.getText();
+ 
             rootElement.appendChild(labelTitle);
             rootElement.appendChild(inputElement);
             rootElement.appendChild(labelDone);
-
             rootElement.appendChild(checkboxElement);
-            document.getElementById("detailsCheckbox").checked = selectedTodo.getDone();
         } else {
             // no todo selected
             rootElement.appendChild(infoLabel);

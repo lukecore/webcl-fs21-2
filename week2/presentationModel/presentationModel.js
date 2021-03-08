@@ -11,7 +11,7 @@ const Attribute = value => {
 
     let converter = id;
     const setConverter = newConverter => {
-        converter = newConverter; // TODO: newConverter is not a constructor
+        converter = newConverter;
         setConvertedValue(valueObs.getValue());
     };
 
