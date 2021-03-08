@@ -3,7 +3,7 @@ body {
     font-family:    "Helvetica Neue", sans-serif;
 }
 main {
-    max-width:  40em;
+    max-width:  80em;
     margin:     auto;
     padding:    2em;
     box-shadow: 0 4px  8px 0 rgba(0, 0, 0, 0.2),
@@ -29,8 +29,10 @@ input[type=text]:focus {
 #todoContainer {
     display:        grid;
     grid-column-gap: 0.5em;
-    grid-template-columns: 1.7em auto auto;
+    grid-template-columns: 1.7em auto auto 5em;
     margin-bottom:  0.5em ;
+}
+#todoDetailContainer {
 }
 #plus, #fortune {
     position: relative;
@@ -44,4 +46,18 @@ input[type=text]:focus {
 }
 input.invalid {
     color: red;
+}
+
+#wrapper {
+	display: flex;
+}
+.left {
+	flex: 1;
+}
+.right {
+	flex: 1;
+	padding: 16px 16px 32px 16px;
+	margin-left: 32px;
+	border: 1px solid #ccc;
+	border-radius: 16px;
 }

@@ -1,5 +1,5 @@
 
-import {TodoController, TodoOpenView, TodoTotalView, TodoItemsView} from './todo.js';
+import {TodoController, TodoOpenView, TodoTotalView, TodoItemsView, TodoDetailView} from './todo.js';
 
 const todoController = TodoController();
 
@@ -11,6 +11,7 @@ document.getElementById('fortune').onclick = _ => todoController.addFortuneTodo(
 // create the sub-views, incl. binding
 
 TodoItemsView(todoController, document.getElementById('todoContainer'));
+TodoDetailView(todoController, document.getElementById('todoDetailContainer'));
 TodoTotalView(todoController, document.getElementById('numberOfTasks'));
 TodoOpenView (todoController, document.getElementById('openTasks'));
 

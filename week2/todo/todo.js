@@ -1,9 +1,9 @@
-import { ObservableList } from "../observable/observable.js";
+import { ObservableList, Observable } from "../observable/observable.js";
 import { Attribute }      from "../presentationModel/presentationModel.js";
 import { Scheduler }      from "../dataflow/dataflow.js";
 import { fortuneService } from "./fortuneService.js";
 
-export { TodoController, TodoItemsView, TodoTotalView, TodoOpenView}
+export { TodoController, TodoItemsView, TodoTotalView, TodoOpenView, TodoDetailView}
 
 const TodoController = () => {
 
@@ -25,7 +25,8 @@ const TodoController = () => {
         }
     };
 
-    const todoModel = ObservableList([]); // observable array of Todos, this state is private
+    const selectedTodo = Observable(null);
+    const todoModel = ObservableList([]);	// observable array of Todos, this state is private
     const scheduler = Scheduler();
 
     const addTodo = () => {
@@ -33,6 +34,8 @@ const TodoController = () => {
         todoModel.add(newTodo);
         return newTodo;
     };
+	
+    const selectTodo = todo => selectedTodo.setValue(todo);
 
     const addFortuneTodo = () => {
 
@@ -59,6 +62,8 @@ const TodoController = () => {
         removeTodo:         todoModel.del,
         onTodoAdd:          todoModel.onAdd,
         onTodoRemove:       todoModel.onDel,
+        selectTodo:     	selectTodo,
+        onTodoSelected:     selectedTodo.onChange,
         removeTodoRemoveListener: todoModel.removeDeleteListener, // only for the test case, not used below
     }
 };
@@ -74,42 +79,85 @@ const TodoItemsView = (todoController, rootElement) => {
             const template = document.createElement('DIV'); // only for parsing
             template.innerHTML = `
                 <button class="delete">&times;</button>
-                <input type="text" size="42">
-                <input type="checkbox">            
+                <div id="todoTitle"></div>
+                <div id="todoDone"></div>
+                <button>Select</button>        
             `;
             return template.children;
         }
-        const [deleteButton, inputElement, checkboxElement] = createElements();
+        const [deleteButton, textLabel, todoDone, showButton] = createElements();
 
-        checkboxElement.onclick = _ => todo.setDone(checkboxElement.checked);
+        showButton.onclick = _ => todoController.selectTodo(todo);
         deleteButton.onclick    = _ => todoController.removeTodo(todo);
 
         todoController.onTodoRemove( (removedTodo, removeMe) => {
             if (removedTodo !== todo) return;
-            rootElement.removeChild(inputElement);
+            rootElement.removeChild(textLabel);
             rootElement.removeChild(deleteButton);
-            rootElement.removeChild(checkboxElement);
+            rootElement.removeChild(showButton);
+            rootElement.removeChild(todoDone);
             removeMe();
         } );
 
-        inputElement.oninput = _ => todo.setText(inputElement.value);
-
-        todo.onTextChanged(() => inputElement.value = todo.getText());
-
-        todo.onTextValidChanged(
-            valid => valid
-              ? inputElement.classList.remove("invalid")
-              : inputElement.classList.add("invalid")
-        );
+        todo.onTextChanged(() => {textLabel.innerHTML = todo.getText()});
+        todo.onDoneChanged(() => {todoDone.innerHTML = todo.getDone() ? 'DONE' : 'OPEN'});
 
         rootElement.appendChild(deleteButton);
-        rootElement.appendChild(inputElement);
-        rootElement.appendChild(checkboxElement);
+        rootElement.appendChild(textLabel);
+        rootElement.appendChild(todoDone);
+        rootElement.appendChild(showButton);
     };
 
     // binding
 
     todoController.onTodoAdd(render);
+
+    // we do not expose anything as the view is totally passive.
+};
+
+const TodoDetailView = (todoController, rootElement) => {
+	
+    const render = selectedTodo => {
+		// TODO: remove info label or fields on todo select
+		
+		// show details only if todo is selected
+		if (selectedTodo) {
+			function createElements() {
+				const template = document.createElement('DIV'); // only for parsing
+				template.innerHTML = `
+					<b>Titel</b>
+					<input type="text" size="42">
+					<b>Done</b>
+					<input type="checkbox">            
+				`;
+				return template.children;
+			}
+			const [labelTitle, inputElement, labelDone, checkboxElement] = createElements();
+
+			checkboxElement.onclick = _ => selectedTodo.setDone(checkboxElement.checked);
+			inputElement.oninput = _ => selectedTodo.setText(inputElement.value);
+			selectedTodo.onTextChanged(() => inputElement.value = selectedTodo.getText());
+
+			selectedTodo.onTextValidChanged(
+				valid => valid
+				  ? inputElement.classList.remove("invalid")
+				  : inputElement.classList.add("invalid")
+			);
+
+			rootElement.appendChild(labelTitle);
+			rootElement.appendChild(inputElement);
+			rootElement.appendChild(labelDone);
+			rootElement.appendChild(checkboxElement);
+		} else {
+			// no todo selected
+			const infoLabel = document.createTextNode('No todo selected');
+			rootElement.appendChild(infoLabel);
+		}
+    };
+
+    // binding
+
+    todoController.onTodoSelected(render);
 
     // we do not expose anything as the view is totally passive.
 };
