@@ -148,7 +148,6 @@ const TodoDetailView = (todoController, rootElement) => {
 
 
             checkboxElement.onclick = _ => selectedTodo.setDone(checkboxElement.checked);
-            inputElement.oninput = _ => selectedTodo.setText(inputElement.value);
             selectedTodo.onTextChanged(() => inputElement.value = selectedTodo.getText());
 
 			selectedTodo.onTextValidChanged(
@@ -157,13 +156,14 @@ const TodoDetailView = (todoController, rootElement) => {
 				  : inputElement.classList.add("invalid")
 			);
 
+
+            inputElement.innerHTML = selectedTodo.getText();
             rootElement.appendChild(labelTitle);
             rootElement.appendChild(inputElement);
             rootElement.appendChild(labelDone);
-            rootElement.appendChild(checkboxElement);
 
+            rootElement.appendChild(checkboxElement);
             document.getElementById("detailsCheckbox").checked = selectedTodo.getDone();
-            inputElement.innerHTML = selectedTodo.getText();
         } else {
             // no todo selected
             rootElement.appendChild(infoLabel);
